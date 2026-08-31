@@ -106,3 +106,44 @@ When you're done, leave the virtual environment with:
 ```bash
 deactivate
 ```
+
+## Demos
+
+Grouped by topic, in teaching order. Each builds on the one before it.
+
+### Listing models
+
+| File | What it shows |
+| --- | --- |
+| `list_models.py` | The basic call: connect to Bedrock and list foundation models (name + ID). The `modelId` is what you pass when you invoke a model. |
+| `list_models_pretty.py` | Same call, but prints the response as indented JSON so the structure is readable. |
+| `list_models_logging.py` | Turns on botocore wire logging to show the raw HTTP request/response (the "firehose"). Note: real credentials appear in the logs. |
+| `list_models_devtools.py` | A cleaner "under the hood" view — request method/URL/headers and response status, with secrets redacted. Like the DevTools Network tab. |
+| `list_models.ipynb` | Notebook version: call → collapsible response tree → names + IDs → DevTools-style request/response. |
+
+*Teaching point:* the `bedrock` client is the control plane (metadata about models); `bedrock-runtime` (below) is the data plane (actually running models).
+
+### Invoking a model (InvokeModel)
+
+| File | What it shows |
+| --- | --- |
+| `invoke_model.py` | Build a Claude-specific JSON payload (Anthropic Messages format), invoke the model, parse the response text. |
+| `invoke_model_stream.py` | Same call with `invoke_model_with_response_stream` — reads the reply in chunks as it arrives (the "typing" effect). |
+| `invoke_model.ipynb` | Notebook: build payload → invoke → read text → inspect the full response structure. |
+| `invoke_model_stream.ipynb` | Notebook: stream the reply, then inspect the event chunks (`message_start`, `content_block_delta`, `message_stop`). |
+
+*Teaching point:* `invoke_model` uses a different payload shape for every model family. Streaming is plain HTTPS (chunked), not WebSockets.
+
+### The Converse API
+
+| File | What it shows |
+| --- | --- |
+| `converse.py` | The modern, unified call: one `messages`/`system`/`inferenceConfig` structure that works across model families. |
+| `converse_stream.py` | Same request, streamed via `converse_stream`. |
+| `converse.ipynb` | Notebook: converse → response structure → converse_stream with its event types. |
+| `converse_chat.py` | Interactive multi-turn chat in the terminal. Appends each turn to the history so the model remembers context. |
+| `converse_chat_stream.py` | Interactive chat plus streaming replies — closest to a real chat app. |
+
+*Teaching point:* Converse is AWS's recommended API. Swap the `modelId` and the same code calls Nova, Llama, etc. — no payload rewrite. The chat scripts show how conversation memory works: keep appending user and assistant messages to one `messages` list.
+
+> **Note:** the Converse slides pass both `temperature` and `topP`. Claude Sonnet 4.5 rejects that combination, so the demos use `temperature` only (with `topP` commented out and explained).
