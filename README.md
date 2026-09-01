@@ -121,7 +121,7 @@ Grouped by topic, in teaching order. Each builds on the one before it.
 | `list_models_devtools.py` | A cleaner "under the hood" view — request method/URL/headers and response status, with secrets redacted. Like the DevTools Network tab. |
 | `list_models.ipynb` | Notebook version: call → collapsible response tree → names + IDs → DevTools-style request/response. |
 
-*Teaching point:* the `bedrock` client is the control plane (metadata about models); `bedrock-runtime` (below) is the data plane (actually running models).
+*Teaching/Learning Tip:* the `bedrock` client is the control plane (metadata about models); `bedrock-runtime` (below) is the data plane (actually running models).
 
 ### Invoking a model (InvokeModel)
 
@@ -132,7 +132,7 @@ Grouped by topic, in teaching order. Each builds on the one before it.
 | `invoke_model.ipynb` | Notebook: build payload → invoke → read text → inspect the full response structure. |
 | `invoke_model_stream.ipynb` | Notebook: stream the reply, then inspect the event chunks (`message_start`, `content_block_delta`, `message_stop`). |
 
-*Teaching point:* `invoke_model` uses a different payload shape for every model family. Streaming is plain HTTPS (chunked), not WebSockets.
+*Teaching/Learning Tip:* `invoke_model` uses a different payload shape for every model family. Streaming is plain HTTPS (chunked), not WebSockets.
 
 ### The Converse API
 
@@ -144,6 +144,27 @@ Grouped by topic, in teaching order. Each builds on the one before it.
 | `converse_chat.py` | Interactive multi-turn chat in the terminal. Appends each turn to the history so the model remembers context. |
 | `converse_chat_stream.py` | Interactive chat plus streaming replies — closest to a real chat app. |
 
-*Teaching point:* Converse is AWS's recommended API. Swap the `modelId` and the same code calls Nova, Llama, etc. — no payload rewrite. The chat scripts show how conversation memory works: keep appending user and assistant messages to one `messages` list.
+*Teaching/Learning Tip:* Converse is AWS's recommended API. Swap the `modelId` and the same code calls Nova, Llama, etc. — no payload rewrite. The chat scripts show how conversation memory works: keep appending user and assistant messages to one `messages` list.
 
 > **Note:** the Converse slides pass both `temperature` and `topP`. Claude Sonnet 4.5 rejects that combination, so the demos use `temperature` only (with `topP` commented out and explained).
+
+### Generating synthetic data
+
+| File | What it shows |
+| --- | --- |
+| `generate_reviews.py` | Use Nova Lite to generate labeled city reviews (known sentiment + rating) and store them in DynamoDB. `--cleanup` deletes the table. |
+| `generate_reviews.ipynb` | Notebook walkthrough with Teaching/Learning Tips, mapping to the four slides, plus a cleanup cell. |
+
+*Teaching/Learning Tip:* an LLM can create labeled test data - control the sentiment before generating, so every review is pre-labeled. Uses Nova's own payload shape (`schemaVersion: "messages-v1"`), a nice contrast to Claude and to Converse.
+
+### Batch inference (`batch/` folder)
+
+Summarize reviews at scale with an asynchronous batch job. See `batch/README.md` for the full flow.
+
+| File | What it shows |
+| --- | --- |
+| `batch/setup_batch.py` | Creates the S3 bucket and IAM role a batch job needs; `--cleanup` tears them down. |
+| `batch/summarize_batch.py` | Builds the JSONL manifest; `--submit` starts the job, `--status` checks it. |
+| `batch/summarize_batch.ipynb` | Notebook walkthrough of the manifest format and batch concepts. |
+
+*Teaching/Learning Tip:* batch is the opposite tradeoff from streaming - it optimizes for cost and throughput on large volumes, not low latency. Jobs are async and have a per-model minimum record count, so batch is for bulk work, not one-off calls.
