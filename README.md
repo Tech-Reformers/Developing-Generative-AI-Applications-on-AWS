@@ -79,13 +79,11 @@ Enter your Access Key ID, Secret Access Key, and set the default region to
 
 With the virtual environment activated, run any demo file by name:
 
-```bash
-python <filename>.py
-```
-
-For example:
+The demos live in numbered topic folders (see [Demos](#demos) below). Run a
+script from inside its folder:
 
 ```bash
+cd 01_list_models
 python list_models.py
 ```
 
@@ -109,9 +107,10 @@ deactivate
 
 ## Demos
 
-Grouped by topic, in teaching order. Each builds on the one before it.
+Each topic lives in its own numbered folder, in teaching order. Each builds on
+the one before it. Run demos from inside their folder.
 
-### Listing models
+### `01_list_models/`
 
 | File | What it shows |
 | --- | --- |
@@ -123,7 +122,7 @@ Grouped by topic, in teaching order. Each builds on the one before it.
 
 *Teaching/Learning Tip:* the `bedrock` client is the control plane (metadata about models); `bedrock-runtime` (below) is the data plane (actually running models).
 
-### Invoking a model (InvokeModel)
+### `02_invoke_model/`
 
 | File | What it shows |
 | --- | --- |
@@ -134,7 +133,7 @@ Grouped by topic, in teaching order. Each builds on the one before it.
 
 *Teaching/Learning Tip:* `invoke_model` uses a different payload shape for every model family. Streaming is plain HTTPS (chunked), not WebSockets.
 
-### The Converse API
+### `03_converse/`
 
 | File | What it shows |
 | --- | --- |
@@ -148,7 +147,7 @@ Grouped by topic, in teaching order. Each builds on the one before it.
 
 > **Note:** the Converse slides pass both `temperature` and `topP`. Claude Sonnet 4.5 rejects that combination, so the demos use `temperature` only (with `topP` commented out and explained).
 
-### Generating synthetic data
+### `04_synthetic_reviews/`
 
 | File | What it shows |
 | --- | --- |
@@ -157,14 +156,15 @@ Grouped by topic, in teaching order. Each builds on the one before it.
 
 *Teaching/Learning Tip:* an LLM can create labeled test data - control the sentiment before generating, so every review is pre-labeled. Uses Nova's own payload shape (`schemaVersion: "messages-v1"`), a nice contrast to Claude and to Converse.
 
-### Batch inference (`batch/` folder)
+### `05_batch/`
 
-Summarize reviews at scale with an asynchronous batch job. See `batch/README.md` for the full flow.
+Summarize reviews at scale with an asynchronous batch job. See
+`05_batch/README.md` for the full step-by-step flow.
 
 | File | What it shows |
 | --- | --- |
-| `batch/setup_batch.py` | Creates the S3 bucket and IAM role a batch job needs; `--cleanup` tears them down. |
-| `batch/summarize_batch.py` | Builds the JSONL manifest; `--submit` starts the job, `--status` checks it. |
-| `batch/summarize_batch.ipynb` | Notebook walkthrough of the manifest format and batch concepts. |
+| `setup_batch.py` | Creates the S3 bucket and IAM role a batch job needs; `--cleanup` tears them down. |
+| `summarize_batch.py` | Builds the JSONL manifest; `--submit` starts the job, `--status` checks it. |
+| `summarize_batch.ipynb` | Notebook walkthrough of the manifest format and batch concepts. |
 
 *Teaching/Learning Tip:* batch is the opposite tradeoff from streaming - it optimizes for cost and throughput on large volumes, not low latency. Jobs are async and have a per-model minimum record count, so batch is for bulk work, not one-off calls.
