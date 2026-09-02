@@ -11,5 +11,6 @@ __pycache__/
 # macOS
 .DS_Store
 
-# Generated batch inference manifest
+# Generated batch inference manifest and downloaded job output
 batch_manifest.jsonl
+*.json.out
