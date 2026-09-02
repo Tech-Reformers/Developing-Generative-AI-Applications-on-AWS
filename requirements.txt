@@ -6,3 +6,8 @@ ipykernel
 langchain
 langchain-aws
 langchain-community
+
+# For the evaluation module (10_evaluation)
+strands-agents
+strands-agents-evals
+nest-asyncio

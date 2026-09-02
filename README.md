@@ -234,3 +234,20 @@ portability. It's included as a concept survey - this course standardizes on
 **Strands** for agent work. Running the history chain surfaces real deprecation
 warnings (`langchain-community` sunset, `RunnableWithMessageHistory` superseded
 by LangGraph), a reminder that these abstractions churn quickly.
+
+### `10_evaluation/`
+
+Measuring RAG / agent quality. The slides teach **Ragas** and its metric
+vocabulary (context precision, recall, faithfulness, response relevancy); the
+demo uses **Strands Evals** (`strands-agents-evals`), the Strands-native
+evaluation framework, to score answers with an LLM judge.
+
+| File | What it shows |
+| --- | --- |
+| `strands_evals.ipynb` | Build an evaluation dataset of `Case`s, run a Strands `Agent` through it, and score outputs with `OutputEvaluator` (LLM-as-a-judge). Includes a Ragas-to-Strands-Evals metric mapping table. |
+
+*Teaching/Learning Tip:* the Ragas *concepts* transfer directly, but its latest
+release is currently broken on import against modern LangChain, and this course
+standardizes on Strands - so the runnable demo uses Strands Evals. Same idea
+(LLM-as-a-judge scoring against a reference dataset), a tool that fits the stack
+and actually runs.
