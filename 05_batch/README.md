@@ -13,6 +13,12 @@ JSONL manifest, upload it to S3, submit a job, and pick up the results later.
 | `setup_batch.py` | Creates the S3 bucket and IAM role the job needs (and tears them down with `--cleanup`). |
 | `summarize_batch.py` | Builds the JSONL manifest; `--submit` uploads it and starts the job; `--status` checks a job. |
 | `summarize_batch.ipynb` | Notebook walkthrough with Teaching/Learning Tips explaining the manifest and batch concepts. |
+| `batch_manifest.json.out` | A real, completed job's output (1000 review summaries). Committed so you can show batch results **without** running a job. |
+
+> **Teaching/Learning Tip:** batch jobs take minutes to hours, so they don't
+> fit in a live lecture. Open `batch_manifest.json.out` to show finished
+> results directly - each line pairs the request (`modelInput`) with the
+> generated summary (`modelOutput`) and token usage.
 
 ## Why batch (Teaching/Learning Tip)
 
