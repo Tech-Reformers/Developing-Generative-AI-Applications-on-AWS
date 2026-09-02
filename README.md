@@ -182,3 +182,17 @@ content block (Bedrock parses the file for you).
 | `qa.ipynb` | Notebook: ask *without* the document (model can't answer) → ask *with* it (grounded answer). Plus the S3 variant. |
 
 *Teaching/Learning Tip:* this is the core idea behind RAG - give the model the relevant context in the request so it answers from your document, not its training memory. The before/after contrast in the notebook shows exactly why grounding matters.
+
+### `07_conversation_history/`
+
+Persistent, per-user chat history stored in DynamoDB - a conversation that
+survives across requests and restarts (unlike the in-memory chat in
+`03_converse`).
+
+| File | What it shows |
+| --- | --- |
+| `lambda_handler.py` | The slide architecture: a Lambda that loads/stores history in DynamoDB, keyed by the user's JWT id. Reference implementation (not run locally). |
+| `chat_persistent.py` | Runnable terminal chat with a fixed user id. History persists in DynamoDB, so quitting and re-running still remembers. `--reset` clears history; `--cleanup` deletes the table. |
+| `conversation_history.ipynb` | Notebook mapping to the five slides: store/load helpers, then two turns where turn 2 recalls turn 1 from DynamoDB. Includes a cleanup cell. |
+
+*Teaching/Learning Tip:* the model is stateless - "memory" is just past messages you store and resend. Keying by user id gives each person their own private history; in the Lambda version that id comes from the verified JWT, so users can't read each other's chats. A TTL auto-expires old messages.
