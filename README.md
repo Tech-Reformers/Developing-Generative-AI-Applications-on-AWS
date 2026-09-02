@@ -196,3 +196,25 @@ survives across requests and restarts (unlike the in-memory chat in
 | `conversation_history.ipynb` | Notebook mapping to the five slides: store/load helpers, then two turns where turn 2 recalls turn 1 from DynamoDB. Includes a cleanup cell. |
 
 *Teaching/Learning Tip:* the model is stateless - "memory" is just past messages you store and resend. Keying by user id gives each person their own private history; in the Lambda version that id comes from the verified JWT, so users can't read each other's chats. A TTL auto-expires old messages.
+
+### `08_knowledge_base/`
+
+Managed RAG with Amazon Bedrock Knowledge Bases: point Bedrock at documents in
+S3 and it chunks, embeds, and indexes them for grounded retrieval. Uses **S3
+Vectors** as the vector store (cheap, scales to zero) instead of the slides'
+OpenSearch Serverless.
+
+| File | What it shows |
+| --- | --- |
+| `setup_kb.py` | Creates the vector store, S3 data bucket, IAM role, knowledge base, data source (fixed-size chunking), and runs ingestion. `--cleanup` tears it all down. |
+| `query_kb.py` | `RetrieveAndGenerate` against the KB - grounded answer plus source citations. |
+| `knowledge_base.ipynb` | Notebook mapping the three slides (adapted to S3 Vectors), with the chunking config and a live query. |
+
+*Teaching/Learning Tip:* the slides use OpenSearch Serverless, which bills
+~$350/month idle. **S3 Vectors** does the same job for a demo at cents. Same KB
+API - only `storageConfiguration` changes.
+
+> **Cost + cleanup:** this creates real (cheap) AWS resources. Always run
+> `python setup_kb.py --cleanup` when finished. Also note `inclusionPrefixes` on
+> the S3 connector are literal key prefixes, **not** regex - a `.*\.pdf` pattern
+> silently indexes zero documents.
