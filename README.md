@@ -168,3 +168,17 @@ Summarize reviews at scale with an asynchronous batch job. See
 | `summarize_batch.ipynb` | Notebook walkthrough of the manifest format and batch concepts. |
 
 *Teaching/Learning Tip:* batch is the opposite tradeoff from streaming - it optimizes for cost and throughput on large volumes, not low latency. Jobs are async and have a per-model minimum record count, so batch is for bulk work, not one-off calls.
+
+### `06_question_answering/`
+
+Answer questions grounded in a document, using the Converse API's `document`
+content block (Bedrock parses the file for you).
+
+| File | What it shows |
+| --- | --- |
+| `make_sample_pdf.py` | Generates `sample_report.pdf`, the demo document (no dependencies). |
+| `qa_document.py` | Attach a local PDF as a `document` block (bytes) and ask a question about it. |
+| `qa_s3.py` | Same, but reference the PDF in S3 via `s3Location`. Creates a bucket/uploads the file; `--cleanup` removes it. |
+| `qa.ipynb` | Notebook: ask *without* the document (model can't answer) → ask *with* it (grounded answer). Plus the S3 variant. |
+
+*Teaching/Learning Tip:* this is the core idea behind RAG - give the model the relevant context in the request so it answers from your document, not its training memory. The before/after contrast in the notebook shows exactly why grounding matters.
