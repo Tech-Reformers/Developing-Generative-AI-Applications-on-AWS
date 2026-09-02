@@ -218,3 +218,19 @@ API - only `storageConfiguration` changes.
 > `python setup_kb.py --cleanup` when finished. Also note `inclusionPrefixes` on
 > the S3 connector are literal key prefixes, **not** regex - a `.*\.pdf` pattern
 > silently indexes zero documents.
+
+### `09_langchain/`
+
+A short survey of using **LangChain** with Bedrock - the same invoke, prompt
+template, and conversation-history patterns from earlier modules, expressed the
+LangChain way. Notebook only.
+
+| File | What it shows |
+| --- | --- |
+| `langchain_bedrock.ipynb` | `init_chat_model` invoke, the `AIMessage` response, `ChatPromptTemplate`, and a chain with DynamoDB-backed history. Creates and cleans up its own session table. |
+
+*Teaching/Learning Tip:* LangChain trades control for convenience and provider
+portability. It's included as a concept survey - this course standardizes on
+**Strands** for agent work. Running the history chain surfaces real deprecation
+warnings (`langchain-community` sunset, `RunnableWithMessageHistory` superseded
+by LangGraph), a reminder that these abstractions churn quickly.
