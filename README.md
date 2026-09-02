@@ -251,3 +251,20 @@ release is currently broken on import against modern LangChain, and this course
 standardizes on Strands - so the runnable demo uses Strands Evals. Same idea
 (LLM-as-a-judge scoring against a reference dataset), a tool that fits the stack
 and actually runs.
+
+### `11_flows/`
+
+Amazon Bedrock **Flows**: build a workflow by wiring together nodes (input,
+prompt, output, and more) with connections, then deploy and invoke it. The demo
+is the slides' playlist flow - given a genre and a number of songs, generate a
+playlist.
+
+| File | What it shows |
+| --- | --- |
+| `flows.ipynb` | The full lifecycle: define nodes + connections, `create_flow`, `prepare_flow`, version, alias, then `invoke_flow`. Creates its own IAM role and cleans everything up. |
+
+*Teaching/Learning Tip:* a Flow is orchestration you *configure* rather than
+code. Overkill for a single prompt, but powerful when chaining steps (knowledge
+base -> condition -> Lambda) without hosting the glue yourself. Note the
+create -> prepare -> version -> alias lifecycle: you invoke a stable alias, so
+you can roll versions forward or back without changing the caller.
