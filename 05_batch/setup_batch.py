@@ -18,13 +18,14 @@ import sys
 import boto3
 from botocore.exceptions import ClientError
 
-REGION = "us-east-1"
+# Use the region configured in your AWS CLI/profile (falls back to us-east-1).
+REGION = boto3.session.Session().region_name or "us-east-1"
 ROLE_NAME = "BedrockBatchDemoRole"
 POLICY_NAME = "BedrockBatchDemoS3Access"
 
 
 def account_id():
-    return boto3.client("sts", region_name=REGION).get_caller_identity()["Account"]
+    return boto3.client("sts").get_caller_identity()["Account"]
 
 
 def bucket_name():
@@ -72,7 +73,7 @@ def s3_policy(bucket):
 def create():
     acct = account_id()
     bucket = bucket_name()
-    s3 = boto3.client("s3", region_name=REGION)
+    s3 = boto3.client("s3")
     iam = boto3.client("iam")
 
     # 1. S3 bucket (us-east-1 does not take a LocationConstraint)
@@ -112,7 +113,7 @@ def create():
 
 def cleanup():
     bucket = bucket_name()
-    s3 = boto3.resource("s3", region_name=REGION)
+    s3 = boto3.resource("s3")
     iam = boto3.client("iam")
 
     # 1. Empty and delete the bucket

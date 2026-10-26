@@ -30,7 +30,6 @@ import boto3
 from botocore.exceptions import ClientError
 
 MODEL_ID = "amazon.nova-lite-v1:0"
-REGION = "us-east-1"
 MANIFEST_FILE = "batch_manifest.jsonl"
 
 # A small base list of cities. We repeat it (with a suffix) to reach the record
@@ -84,7 +83,7 @@ def build_manifest(path=MANIFEST_FILE, count=RECORD_COUNT):
     return count
 
 
-def submit_job(bucket, role_arn, region=REGION, path=MANIFEST_FILE):
+def submit_job(bucket, role_arn, region=None, path=MANIFEST_FILE):
     """Upload the manifest to S3 and start a batch inference job.
 
     Requires:
@@ -120,7 +119,7 @@ def submit_job(bucket, role_arn, region=REGION, path=MANIFEST_FILE):
     return job_arn
 
 
-def check_status(job_arn, region=REGION):
+def check_status(job_arn, region=None):
     """Print the status and progress of a batch inference job."""
     bedrock = boto3.client("bedrock", region_name=region)
     job = bedrock.get_model_invocation_job(jobIdentifier=job_arn)

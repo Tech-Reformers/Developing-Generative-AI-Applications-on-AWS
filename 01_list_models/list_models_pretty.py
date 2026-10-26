@@ -3,7 +3,7 @@
 import json
 import boto3
 
-bedrock = boto3.client("bedrock", region_name="us-east-1")
+bedrock = boto3.client("bedrock")
 response = bedrock.list_foundation_models()
 
 # Show just the list of models, formatted with indentation

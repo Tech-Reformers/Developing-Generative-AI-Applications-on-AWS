@@ -33,7 +33,8 @@ import time
 import boto3
 from botocore.exceptions import ClientError
 
-REGION = "us-east-1"
+# Use the region configured in your AWS CLI/profile (falls back to us-east-1).
+REGION = boto3.session.Session().region_name or "us-east-1"
 EMBED_MODEL = "amazon.titan-embed-text-v2:0"
 EMBED_DIM = 1024
 
@@ -45,11 +46,11 @@ KB_NAME = "DemoKnowledgeBase"
 SAMPLE_DOC = "sample_report.pdf"
 CONFIG_FILE = "kb_config.json"
 
-sts = boto3.client("sts", region_name=REGION)
-s3 = boto3.client("s3", region_name=REGION)
-s3vectors = boto3.client("s3vectors", region_name=REGION)
+sts = boto3.client("sts")
+s3 = boto3.client("s3")
+s3vectors = boto3.client("s3vectors")
 iam = boto3.client("iam")
-bedrock_agent = boto3.client("bedrock-agent", region_name=REGION)
+bedrock_agent = boto3.client("bedrock-agent")
 
 
 def account_id():
@@ -295,7 +296,7 @@ def cleanup():
     # 3. Data bucket
     bucket = data_bucket()
     try:
-        res = boto3.resource("s3", region_name=REGION).Bucket(bucket)
+        res = boto3.resource("s3").Bucket(bucket)
         res.objects.all().delete()
         res.delete()
         print(f"Deleted data bucket: {bucket}")

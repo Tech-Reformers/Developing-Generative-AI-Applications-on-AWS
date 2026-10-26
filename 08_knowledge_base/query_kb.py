@@ -16,12 +16,6 @@ import sys
 
 import boto3
 
-REGION = "us-east-1"
-# Model that writes the final answer from the retrieved chunks
-GENERATION_MODEL_ARN = (
-    "arn:aws:bedrock:us-east-1:{account}:inference-profile/us.amazon.nova-lite-v1:0"
-)
-
 DEFAULT_QUESTION = (
     "Which vendor has the largest market share, and what is the primary "
     "bottleneck for the industry?"
@@ -34,8 +28,14 @@ def main():
     with open("kb_config.json") as f:
         kb_id = json.load(f)["knowledgeBaseId"]
 
-    account = boto3.client("sts", region_name=REGION).get_caller_identity()["Account"]
-    agent_runtime = boto3.client("bedrock-agent-runtime", region_name=REGION)
+    agent_runtime = boto3.client("bedrock-agent-runtime")
+    region = agent_runtime.meta.region_name  # the resolved (CLI-configured) region
+    account = boto3.client("sts").get_caller_identity()["Account"]
+
+    # Model that writes the final answer from the retrieved chunks
+    generation_model_arn = (
+        f"arn:aws:bedrock:{region}:{account}:inference-profile/us.amazon.nova-lite-v1:0"
+    )
 
     print(f"Question: {question}\n")
     response = agent_runtime.retrieve_and_generate(
@@ -44,7 +44,7 @@ def main():
             "type": "KNOWLEDGE_BASE",
             "knowledgeBaseConfiguration": {
                 "knowledgeBaseId": kb_id,
-                "modelArn": GENERATION_MODEL_ARN.format(account=account),
+                "modelArn": generation_model_arn,
             },
         },
     )

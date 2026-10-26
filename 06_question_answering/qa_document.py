@@ -31,7 +31,7 @@ messages = [{
 }]
 
 inf_params = {"maxTokens": 300, "topP": 0.1, "temperature": 0.3}
-client = boto3.client("bedrock-runtime", region_name="us-east-1")
+client = boto3.client("bedrock-runtime")
 model_id = "us.amazon.nova-lite-v1:0"
 
 model_response = client.converse(

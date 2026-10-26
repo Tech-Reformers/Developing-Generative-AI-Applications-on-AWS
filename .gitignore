@@ -16,3 +16,6 @@ batch_manifest.jsonl
 
 # Knowledge base config (machine-specific IDs, written by setup_kb.py)
 kb_config.json
+
+# Kiro IDE settings (contains machine-specific MCP config and secrets)
+.kiro/

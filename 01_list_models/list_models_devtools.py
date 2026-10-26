@@ -25,7 +25,7 @@ def show_request(request, **kwargs):
     print(json.dumps(clean_headers(request.headers), indent=2))
 
 
-bedrock = boto3.client("bedrock", region_name="us-east-1")
+bedrock = boto3.client("bedrock")
 
 # Fire the hook right before the request is sent over the wire
 bedrock.meta.events.register("before-send.bedrock.ListFoundationModels", show_request)

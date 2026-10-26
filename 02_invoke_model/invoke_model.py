@@ -2,7 +2,7 @@
 import boto3, json
 
 # Instantiate a bedrock runtime client
-bedrock_runtime = boto3.client("bedrock-runtime", region_name="us-east-1")
+bedrock_runtime = boto3.client("bedrock-runtime")
 
 # Construct a payload for the model
 body = json.dumps({

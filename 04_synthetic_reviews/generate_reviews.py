@@ -25,7 +25,6 @@ CITIES = ["Denver", "Seattle", "Austin"]
 
 MODEL_ID = "amazon.nova-lite-v1:0"
 TABLE_NAME = "synthetic-reviews"
-REGION = "us-east-1"
 
 
 def generate_sentiment_distribution():
@@ -124,7 +123,7 @@ def upload_to_dynamodb(table, review_text, rating, city, sentiment):
 
 def delete_table():
     """Delete the reviews table (cleanup)."""
-    dynamodb = boto3.resource("dynamodb", region_name=REGION)
+    dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(TABLE_NAME)
     try:
         table.delete()
@@ -135,8 +134,8 @@ def delete_table():
 
 
 def run():
-    bedrock_client = boto3.client("bedrock-runtime", region_name=REGION)
-    dynamodb = boto3.resource("dynamodb", region_name=REGION)
+    bedrock_client = boto3.client("bedrock-runtime")
+    dynamodb = boto3.resource("dynamodb")
     table = get_or_create_table(dynamodb)
 
     # Generate sentiment distribution across the cities

@@ -17,14 +17,13 @@ import sys
 import boto3
 from botocore.exceptions import ClientError
 
-REGION = "us-east-1"
 MODEL_ID = "us.amazon.nova-lite-v1:0"
 PDF_FILE = "sample_report.pdf"
 S3_KEY = "documents/sample_report.pdf"
 
 
 def account_id():
-    return boto3.client("sts", region_name=REGION).get_caller_identity()["Account"]
+    return boto3.client("sts").get_caller_identity()["Account"]
 
 
 def bucket_name():
@@ -34,8 +33,8 @@ def bucket_name():
 def run():
     acct = account_id()
     bucket = bucket_name()
-    s3 = boto3.client("s3", region_name=REGION)
-    client = boto3.client("bedrock-runtime", region_name=REGION)
+    s3 = boto3.client("s3")
+    client = boto3.client("bedrock-runtime")
 
     # 1. Create the bucket (idempotent) and upload the document
     try:
@@ -78,7 +77,7 @@ def run():
 
 def cleanup():
     bucket = bucket_name()
-    s3 = boto3.resource("s3", region_name=REGION)
+    s3 = boto3.resource("s3")
     try:
         b = s3.Bucket(bucket)
         b.objects.all().delete()

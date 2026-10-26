@@ -1,7 +1,7 @@
 import boto3, sys
 
 # Instantiate a bedrock runtime client
-bedrock_client = boto3.client("bedrock-runtime", region_name="us-east-1")
+bedrock_client = boto3.client("bedrock-runtime")
 
 # Send the message (same request content as converse.py)
 response = bedrock_client.converse_stream(

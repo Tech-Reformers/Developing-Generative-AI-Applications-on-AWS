@@ -1,7 +1,7 @@
 import boto3
 
 # Instantiate a bedrock runtime client
-bedrock_client = boto3.client("bedrock-runtime", region_name="us-east-1")
+bedrock_client = boto3.client("bedrock-runtime")
 
 MODEL_ID = "us.anthropic.claude-sonnet-4-5-20250929-v1:0"
 
