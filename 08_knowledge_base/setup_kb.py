@@ -95,9 +95,17 @@ def create_vector_store():
 
 def create_data_bucket():
     bucket = data_bucket()
+    # us-east-1 rejects a LocationConstraint; every other region requires one
+    # that matches the endpoint the request is sent to.
     try:
-        s3.create_bucket(Bucket=bucket)
-        print(f"Created data bucket: {bucket}")
+        if REGION == "us-east-1":
+            s3.create_bucket(Bucket=bucket)
+        else:
+            s3.create_bucket(
+                Bucket=bucket,
+                CreateBucketConfiguration={"LocationConstraint": REGION},
+            )
+        print(f"Created data bucket: {bucket} ({REGION})")
     except s3.exceptions.BucketAlreadyOwnedByYou:
         print(f"Data bucket already exists: {bucket}")
     s3.upload_file(SAMPLE_DOC, bucket, SAMPLE_DOC)
@@ -189,6 +197,21 @@ def create_knowledge_base(role_arn, vector_bucket_arn, index_arn):
     return kb_id
 
 
+def wait_for_kb_active(kb_id):
+    """A KB is created asynchronously and starts in CREATING. You can't attach
+    a data source / start ingestion until it reaches ACTIVE."""
+    while True:
+        kb = bedrock_agent.get_knowledge_base(knowledgeBaseId=kb_id)["knowledgeBase"]
+        status = kb["status"]
+        print(f"  knowledge base status: {status}")
+        if status == "ACTIVE":
+            break
+        if status == "FAILED":
+            raise RuntimeError(f"Knowledge base {kb_id} failed to create: "
+                               f"{kb.get('failureReasons')}")
+        time.sleep(5)
+
+
 def create_data_source(kb_id, data_bucket_arn):
     resp = bedrock_agent.create_data_source(
         knowledgeBaseId=kb_id,
@@ -247,6 +270,11 @@ def create():
     time.sleep(15)
 
     kb_id = create_knowledge_base(role_arn, vector_bucket_arn, index_arn)
+
+    # KB creation is async - wait for ACTIVE before attaching a data source
+    print("Waiting for knowledge base to become ACTIVE ...")
+    wait_for_kb_active(kb_id)
+
     ds_id = create_data_source(kb_id, data_bucket_arn)
     start_ingestion(kb_id, ds_id)
 
@@ -258,29 +286,59 @@ def create():
 
 # ---------- cleanup ----------
 
+def find_kb_id_by_name(name):
+    """Look up a knowledge base ID by name. Lets cleanup recover when a failed
+    setup created the KB but never wrote kb_config.json."""
+    paginator = bedrock_agent.get_paginator("list_knowledge_bases")
+    for page in paginator.paginate():
+        for summary in page["knowledgeBaseSummaries"]:
+            if summary["name"] == name:
+                return summary["knowledgeBaseId"]
+    return None
+
+
 def cleanup():
     acct = account_id()
     # Load IDs if we have them
-    kb_id = ds_id = None
+    kb_id = None
     try:
         cfg = json.load(open(CONFIG_FILE))
-        kb_id, ds_id = cfg.get("knowledgeBaseId"), cfg.get("dataSourceId")
+        kb_id = cfg.get("knowledgeBaseId")
     except FileNotFoundError:
         pass
 
-    # 1. Data source, then KB
-    if kb_id and ds_id:
-        try:
-            bedrock_agent.delete_data_source(knowledgeBaseId=kb_id, dataSourceId=ds_id)
-            print(f"Deleted data source: {ds_id}")
-        except ClientError as e:
-            print(f"data source delete: {e}")
+    # Fall back to looking the KB up by name if the config is missing/incomplete
+    # (e.g. a setup run that failed before writing kb_config.json).
+    if not kb_id:
+        kb_id = find_kb_id_by_name(KB_NAME)
+        if kb_id:
+            print(f"Found knowledge base by name: {kb_id}")
+
+    # 1. Delete every data source on the KB (discovered from the API, so we
+    # don't depend on a saved dataSourceId), then the KB itself.
     if kb_id:
+        try:
+            paginator = bedrock_agent.get_paginator("list_data_sources")
+            for page in paginator.paginate(knowledgeBaseId=kb_id):
+                for ds in page["dataSourceSummaries"]:
+                    ds_id = ds["dataSourceId"]
+                    try:
+                        bedrock_agent.delete_data_source(
+                            knowledgeBaseId=kb_id, dataSourceId=ds_id
+                        )
+                        print(f"Deleted data source: {ds_id}")
+                    except ClientError as e:
+                        print(f"data source delete: {e}")
+        except ClientError as e:
+            print(f"list data sources: {e}")
+
         try:
             bedrock_agent.delete_knowledge_base(knowledgeBaseId=kb_id)
             print(f"Deleted knowledge base: {kb_id}")
         except ClientError as e:
             print(f"kb delete: {e}")
+    else:
+        print(f"No knowledge base found (name: {KB_NAME})")
 
     # 2. IAM role
     try:

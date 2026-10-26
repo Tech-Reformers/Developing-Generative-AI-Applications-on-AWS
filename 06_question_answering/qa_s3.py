@@ -17,7 +17,9 @@ import sys
 import boto3
 from botocore.exceptions import ClientError
 
-MODEL_ID = "us.amazon.nova-lite-v1:0"
+# Use the region configured in your AWS CLI/profile (falls back to us-east-1).
+REGION = boto3.session.Session().region_name or "us-east-1"
+MODEL_ID = "us.amazon.nova-2-lite-v1:0"
 PDF_FILE = "sample_report.pdf"
 S3_KEY = "documents/sample_report.pdf"
 
@@ -36,10 +38,18 @@ def run():
     s3 = boto3.client("s3")
     client = boto3.client("bedrock-runtime")
 
-    # 1. Create the bucket (idempotent) and upload the document
+    # 1. Create the bucket (idempotent) and upload the document.
+    # us-east-1 rejects a LocationConstraint; every other region requires one
+    # that matches the endpoint the request is sent to.
     try:
-        s3.create_bucket(Bucket=bucket)
-        print(f"Created bucket: {bucket}")
+        if REGION == "us-east-1":
+            s3.create_bucket(Bucket=bucket)
+        else:
+            s3.create_bucket(
+                Bucket=bucket,
+                CreateBucketConfiguration={"LocationConstraint": REGION},
+            )
+        print(f"Created bucket: {bucket} ({REGION})")
     except s3.exceptions.BucketAlreadyOwnedByYou:
         print(f"Bucket already exists: {bucket}")
     s3.upload_file(PDF_FILE, bucket, S3_KEY)

@@ -45,6 +45,10 @@ Using **PowerShell**:
 python -m venv venv
 
 # 2. Activate it (your prompt will show "(venv)")
+(bash terminal)
+source venv/Scripts/activate
+
+(or command prompt)
 venv\Scripts\Activate.ps1
 
 # 3. Install the dependencies

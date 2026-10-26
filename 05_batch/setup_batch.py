@@ -76,10 +76,18 @@ def create():
     s3 = boto3.client("s3")
     iam = boto3.client("iam")
 
-    # 1. S3 bucket (us-east-1 does not take a LocationConstraint)
+    # 1. S3 bucket. us-east-1 is special: its endpoint rejects a
+    # LocationConstraint, while every other region requires one that matches
+    # the region the request is sent to.
     try:
-        s3.create_bucket(Bucket=bucket)
-        print(f"Created bucket: {bucket}")
+        if REGION == "us-east-1":
+            s3.create_bucket(Bucket=bucket)
+        else:
+            s3.create_bucket(
+                Bucket=bucket,
+                CreateBucketConfiguration={"LocationConstraint": REGION},
+            )
+        print(f"Created bucket: {bucket} ({REGION})")
     except s3.exceptions.BucketAlreadyOwnedByYou:
         print(f"Bucket already exists: {bucket}")
 
